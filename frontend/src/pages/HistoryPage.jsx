@@ -27,13 +27,24 @@ export default function HistoryPage() {
 
   const filtered = useMemo(() => {
     if (!q.trim()) return items;
-    const needle = q.toLowerCase();
-    return items.filter(
-      (x) =>
-        x.name?.toLowerCase().includes(needle) ||
-        String(x.latitude).includes(needle) ||
-        String(x.longitude).includes(needle)
-    );
+    const needle = q.trim().toLowerCase();
+    return items.filter((x) => {
+      const haystack = [
+        x.name,
+        x.label,
+        x.note,
+        x.aiAnalysis?.classification,
+        x.aiAnalysis?.terrain,
+        String(x.latitude),
+        String(x.longitude),
+        Number.isFinite(x.latitude) ? x.latitude.toFixed(5) : '',
+        Number.isFinite(x.longitude) ? x.longitude.toFixed(5) : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(needle);
+    });
   }, [items, q]);
 
   async function handleDelete(id) {
